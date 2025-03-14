@@ -1,0 +1,1 @@
+savedcmd_/home/francisco/Escritorio/U/LabSopes/Proyectos/Proyecto1/Modulo_Kernel/modulo_final.mod := printf '%s\n'   modulo_final.o | awk '!x[$$0]++ { print("/home/francisco/Escritorio/U/LabSopes/Proyectos/Proyecto1/Modulo_Kernel/"$$0) }' > /home/francisco/Escritorio/U/LabSopes/Proyectos/Proyecto1/Modulo_Kernel/modulo_final.mod

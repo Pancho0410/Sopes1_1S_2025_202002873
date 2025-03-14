@@ -10,14 +10,16 @@ while true; do
   CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1}')
 
   # Obtener los datos de los contenedores
+  # "python_container" -> nombre del de python / "grafana" -> nombre del contenedor de grafana
   CONTAINER_STATS=$(docker stats --no-stream --format "{{ json . }}" | jq -s '
+    map(select(.Name != "python_container" and .Name != "grafana")) |
     map({
       ID: .ID,
       Nombre: .Name,
       Memoria: (.MemPerc | rtrimstr("%") | tonumber),
       CPU: (.CPUPerc | rtrimstr("%") | tonumber),
-      Disco: ( .BlockIO | split(" /") | .[0] | if . == "0B" then "0" else rtrimstr("kB") end | tonumber),
-      IO: ( .NetIO | split(" /") | .[0] | if . == "0B" then "0" else rtrimstr("kB") end | tonumber)
+      Disco: ( .BlockIO | split(" /") | .[0] | if . == "0B" then "0" else sub("(kB|MB)$"; "") end | tonumber),
+      IO: ( .NetIO | split(" /") | .[0] | if . == "0B" then "0" else sub("(kB|MB)$"; "") end | tonumber)
     })')
 
   CONTAINERS_WITH_PIDS=()
@@ -41,12 +43,10 @@ while true; do
     --arg used_ram "$USED_RAM" \
     --arg cpu_usage "$CPU_USAGE" \
     '{
-      sistema: {
-        ram_total: ($total_ram | tonumber),
-        ram_libre: ($free_ram | tonumber),
-        ram_usada: ($used_ram | tonumber),
-        cpu_usado: ($cpu_usage | tonumber)
-      },
+      ram_total: ($total_ram | tonumber),
+      ram_libre: ($free_ram | tonumber),
+      ram_usada: ($used_ram | tonumber),
+      cpu_usado: ($cpu_usage | tonumber),
       containers: $containers
     }' > "$OUTPUT_FILE"
 

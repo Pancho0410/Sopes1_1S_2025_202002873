@@ -1,0 +1,22 @@
+#Insalar primero curl
+sudo apt update
+sudo apt install curl
+
+#instalar con curl
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+#Configurar el entorno/ path
+source $HOME/.cargo/env
+
+#verificar instalacion
+
+rustc --version
+
+
+
+
+
+#Instalar dependencias en rust
+
+cargo add serde --features derive
+cargo add serde_json chrono ctrlc

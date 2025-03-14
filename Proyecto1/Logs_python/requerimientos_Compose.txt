@@ -1,0 +1,11 @@
+#instalar compose
+
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+
+#Ahora se le agregan los permisos necesarios para ejecutarlo
+sudo chmod +x /usr/local/bin/docker-compose
+
+#Si es necesario ubicarlo en otra ruta podemos ejecutar:
+
+sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose

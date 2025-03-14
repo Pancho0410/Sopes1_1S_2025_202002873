@@ -9,6 +9,7 @@ generate_random_name() {
 # Tipos de contenedores
 CONTAINER_TYPES=("cpu" "ram" "io" "disk")
 
+echo "---------------------------------------------------------------------" >> $SCRIPT_LOG
 # Generar 10 contenedores
 for i in {1..10}; do
     # Seleccionar un tipo de contenedor aleatorio
@@ -25,10 +26,10 @@ for i in {1..10}; do
             docker run -d --cpus="0.2" --memory="50m" --name $CONTAINER_NAME containerstack/alpine-stress stress --vm 1 --vm-bytes 50MB
             ;;
         "io")
-            docker run -d --cpus="0.2" --memory="50m" --name $CONTAINER_NAME containerstack/alpine-stress stress --io 4
+            docker run -d --cpus="0.2" --memory="50m" --name $CONTAINER_NAME containerstack/alpine-stress stress --io 2
             ;;
         "disk")
-            docker run -d --cpus="0.2" --memory="50m" --name $CONTAINER_NAME containerstack/alpine-stress stress --hdd 4
+            docker run -d --cpus="0.2" --memory="50m" --name $CONTAINER_NAME containerstack/alpine-stress stress --hdd 2
             ;;
     esac
 

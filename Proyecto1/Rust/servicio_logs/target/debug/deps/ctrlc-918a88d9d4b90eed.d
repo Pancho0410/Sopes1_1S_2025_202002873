@@ -1,0 +1,11 @@
+/home/francisco/Escritorio/U/LabSopes/Proyectos/Proyecto1/Rust/servicio_logs/target/debug/deps/libctrlc-918a88d9d4b90eed.rmeta: /home/francisco/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ctrlc-3.4.5/src/lib.rs /home/francisco/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ctrlc-3.4.5/src/error.rs /home/francisco/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ctrlc-3.4.5/src/platform/mod.rs /home/francisco/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ctrlc-3.4.5/src/platform/unix/mod.rs /home/francisco/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ctrlc-3.4.5/src/signal.rs
+
+/home/francisco/Escritorio/U/LabSopes/Proyectos/Proyecto1/Rust/servicio_logs/target/debug/deps/libctrlc-918a88d9d4b90eed.rlib: /home/francisco/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ctrlc-3.4.5/src/lib.rs /home/francisco/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ctrlc-3.4.5/src/error.rs /home/francisco/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ctrlc-3.4.5/src/platform/mod.rs /home/francisco/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ctrlc-3.4.5/src/platform/unix/mod.rs /home/francisco/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ctrlc-3.4.5/src/signal.rs
+
+/home/francisco/Escritorio/U/LabSopes/Proyectos/Proyecto1/Rust/servicio_logs/target/debug/deps/ctrlc-918a88d9d4b90eed.d: /home/francisco/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ctrlc-3.4.5/src/lib.rs /home/francisco/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ctrlc-3.4.5/src/error.rs /home/francisco/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ctrlc-3.4.5/src/platform/mod.rs /home/francisco/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ctrlc-3.4.5/src/platform/unix/mod.rs /home/francisco/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ctrlc-3.4.5/src/signal.rs
+
+/home/francisco/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ctrlc-3.4.5/src/lib.rs:
+/home/francisco/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ctrlc-3.4.5/src/error.rs:
+/home/francisco/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ctrlc-3.4.5/src/platform/mod.rs:
+/home/francisco/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ctrlc-3.4.5/src/platform/unix/mod.rs:
+/home/francisco/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ctrlc-3.4.5/src/signal.rs:
