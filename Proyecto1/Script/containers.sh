@@ -22,13 +22,13 @@ for i in {1..10}; do
             docker run -d --cpus="0.2" --memory="50m" --name $CONTAINER_NAME containerstack/alpine-stress stress --cpu 1
             ;;
         "ram")
-            docker run -d --cpus="0.2" --memory="50m" --name $CONTAINER_NAME containerstack/alpine-stress stress --vm 1 --vm-bytes 50M
+            docker run -d --cpus="0.2" --memory="50m" --name $CONTAINER_NAME containerstack/alpine-stress stress --vm 1 --vm-bytes 50MB
             ;;
         "io")
-            docker run -d --cpus="0.2" --memory="50m" --name $CONTAINER_NAME containerstack/alpine-stress stress --io 1
+            docker run -d --cpus="0.2" --memory="50m" --name $CONTAINER_NAME containerstack/alpine-stress stress --io 4
             ;;
         "disk")
-            docker run -d --cpus="0.2" --memory="50m" --name $CONTAINER_NAME containerstack/alpine-stress stress --hdd 1
+            docker run -d --cpus="0.2" --memory="50m" --name $CONTAINER_NAME containerstack/alpine-stress stress --hdd 4
             ;;
     esac
 

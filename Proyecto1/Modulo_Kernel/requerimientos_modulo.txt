@@ -1,0 +1,8 @@
+sudo apt update      #Inclute gcc y make
+sudo apt install build-essential linux-headers-$(uname -r)
+
+
+verificar instalacion
+
+dpkg -s build-essential
+dpkg -s linux-headers-$(uname -r)
