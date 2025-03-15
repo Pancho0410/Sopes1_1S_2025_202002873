@@ -8,6 +8,7 @@ use std::thread;
 use std::time::Duration;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::mpsc;
 use serde_json::json;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -49,7 +50,6 @@ struct LogContainer {
     nombre: String,
     memoria: f64,
     cpu: f64,
-    //action: String,
     timestamp: String,
 }
 
@@ -57,7 +57,7 @@ fn kill_container(id: &str) -> std::process::Output {
     let output = std::process::Command::new("sudo")
         .arg("docker")
         .arg("rm")
-        .arg("-f") // Forzar eliminación del contenedor
+        .arg("-f") 
         .arg(id)
         .output()
         .expect("failed to execute process");
@@ -66,67 +66,75 @@ fn kill_container(id: &str) -> std::process::Output {
     output
 }
 
-fn analyzer( system_info:  SystemInfo) {
-
+fn analyzer(system_info: SystemInfo) {
     println!("Total RAM: {} MB", system_info.ram_total);
     println!("RAM libre: {} MB", system_info.ram_libre);
     println!("RAM usada: {} MB", system_info.ram_usada);
     println!("CPU usado: {} %", system_info.cpu_usado);
     println!("-------------------------------------");
-    
-    let mut log_cont_list: Vec<LogContainer> = Vec::new();
-    let mut containers_list: Vec<Container> = system_info.containers;
 
-    for container in containers_list.iter() {
-        let log_container = LogContainer {
-            pid: container.pid.clone(),
-            container_id: container.id.to_string(),
-            nombre: container.nombre.clone(),
-            memoria: container.memoria,
-            cpu: container.cpu,
-            //action: "Killed".to_string(),
-            timestamp: Utc::now().to_rfc3339(),
-        };
-        log_cont_list.push(log_container.clone());
+    let containers_list: Vec<Container> = system_info.containers;
+    let (tx, rx) = mpsc::channel(); // Crear un canal para comunicación entre hilos
 
-        //let _output = kill_container(&container.id);
+    // Iterar sobre una referencia a containers_list
+    for container in &containers_list {
+        let tx = tx.clone(); // Clonar el transmisor para cada hilo
+        let container = container.clone(); // Clonar el contenedor para moverlo al hilo
+        thread::spawn(move || {
+            let log_container = LogContainer {
+                pid: container.pid.clone(),
+                container_id: container.id.to_string(),
+                nombre: container.nombre.clone(),
+                memoria: container.memoria,
+                cpu: container.cpu,
+                timestamp: Utc::now().to_rfc3339(),
+            };
 
+            // Eliminar el contenedor
+            let _output = kill_container(&container.id);
+
+            // Enviar el log al hilo principal
+            tx.send(log_container).unwrap();
+        });
     }
 
-    let logs_json = match serde_json::to_string(&log_cont_list) {
-        Ok(json) => json,
-        Err(e) => {
-            eprintln!("Error converting logs to JSON: {}", e);
-            return;
+    // Recopilar los logs de los hilos
+    let mut log_cont_list = Vec::new();
+    for _ in 0..containers_list.len() {
+        if let Ok(log) = rx.recv() {
+            log_cont_list.push(log);
         }
-    };
-
-    
-    let output = std::process::Command::new("sh")
-        .arg("-c")
-        .arg(format!(
-            "curl -X POST http://localhost:5000/allLogs -H 'Content-Type: application/json' -d '{}'",
-            logs_json
-        ))
-        .output()
-        .expect("Failed to execute curl command");
-
-    if output.status.success() {
-        println!("Logs enviados exitosamente a la API.");
-    } else {
-        eprintln!("Error al enviar logs: {:?}", output.stderr);
     }
-  
-    
-    
-    // println!("Contenedores matados");
-    // for process in log_proc_list {
-    //     println!("PID: {}, Name: {}, Container ID: {}, Memory Usage: {}, CPU Usage: {} \n", process.pid, process.name, process.container_id,  process.memory_usage, process.cpu_usage);
-    // }
-        
+
+    if !log_cont_list.is_empty() {
+        let logs_json = match serde_json::to_string(&log_cont_list) {
+            Ok(json) => json,
+            Err(e) => {
+                eprintln!("Error converting logs to JSON: {}", e);
+                return;
+            }
+        };
+
+        let output = Command::new("sh")
+            .arg("-c")
+            .arg(format!(
+                "curl -X POST http://localhost:5000/allLogs -H 'Content-Type: application/json' -d '{}'",
+                logs_json
+            ))
+            .output()
+            .expect("Failed to execute curl command");
+
+        if output.status.success() {
+            println!("Logs enviados exitosamente a la API.");
+        } else {
+            eprintln!("Error al enviar logs: {:?}", output.stderr);
+        }
+    } else {
+        println!("No hay logs para enviar.");
+    }
+
     println!("-------------------------------------");
 }
-
 
 fn delete_docker_compose() {
     let output = Command::new("sudo")
@@ -152,7 +160,7 @@ fn execute_docker_compose() {
         .arg("/home/francisco/Escritorio/U/LabSopes/Proyectos/Proyecto1/Logs_python/docker-compose.yml")
         .arg("up")
         .arg("--build")  // Reconstruir las imágenes
-        .arg("-d")       // Ejecutar en segundo plano
+        .arg("-d")    
         .output()
         .expect("failed to execute docker-compose");
 
@@ -214,8 +222,55 @@ fn main() {
     let r = running.clone();
 
     ctrlc::set_handler(move || {
-        delete_docker_compose();
         println!("Deteniendo el servicio de Rust");
+        delete_docker_compose();
+
+        let outputk = Command::new("pkill")
+        .arg("-f")
+        .arg("/home/francisco/Escritorio/U/LabSopes/Proyectos/Proyecto1/Script/containers.sh")
+        .output()
+        .expect("Failed to execute pkill command");
+
+        if outputk.status.success() {
+            println!("Todos los procesos de containers.sh han sido terminados.");
+        } else {
+            eprintln!(
+                "Error al terminar los procesos de containers.sh: {:?}",
+                outputk.stderr
+            );
+        }
+
+
+        let output = Command::new("sh")
+        .arg("-c")
+        .arg("crontab -l | grep -v \"/home/francisco/Escritorio/U/LabSopes/Proyectos/Proyecto1/Script/containers.sh\" | crontab -")
+        .output()
+        .expect("Failed to execute command");
+
+        if output.status.success() {
+            println!("Cronjob eliminado correctamente.");
+        } else {
+            eprintln!("Error al eliminar la entrada del crontab: {:?}", output.stderr);
+        }
+
+        let outputc = Command::new("sh")
+        .arg("-c")
+        .arg("docker ps -a --format '{{.ID}} {{.Names}}' | awk '$2 != \"grafana\" {print $1}' | xargs docker rm -f")
+        .output()
+        .expect("Failed to execute command");
+
+        if outputc.status.success() {
+            println!("Contenedores eliminados correctamente (excepto 'grafana').");
+        } else {
+            eprintln!(
+                "Error al eliminar contenedores: {:?}",
+                String::from_utf8_lossy(&outputc.stderr)
+            );
+        }
+
+
+
+
         r.store(false, Ordering::SeqCst);
     }).expect("Error setting Ctrl-C handler");
 
@@ -241,7 +296,7 @@ fn main() {
         send_system_data(&system_info);
         analyzer(system_info);
         
-        std::thread::sleep(std::time::Duration::from_secs(20));
+        std::thread::sleep(std::time::Duration::from_secs(30));
     }
 }
 

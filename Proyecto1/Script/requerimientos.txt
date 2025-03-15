@@ -1,2 +1,25 @@
 sudo apt update
 sudo apt install jq
+
+
+#Subir al cronjob-----------------------------------
+crontab -e
+
+#-------------comando pwd para ver ruta actual -> crear mismo directorio
+#-------------* * * * * repite el scrip como minimo cada minuto no se puede menos de 1 minuto
+
+* * * * * /home/francisco/Escritorio/U/LabSopes/Proyectos/Proyecto1/Script/containers.sh
+
+#--------------CTRL + O para guardar y CTRL + X para salir.--------------------------
+
+ #listar los cronjobs activos
+ crontab -l
+ 
+ 
+ 
+ 
+ 
+ 
+ #Grafana
+
+docker run -d -p 3000:3000 --name=grafana grafana/grafana
