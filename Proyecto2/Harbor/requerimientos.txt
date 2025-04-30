@@ -1,0 +1,25 @@
+instalar en VM:
+sudo apt install certbot  //para https
+
+ip externa: 34.173.10.108
+
+
+
+Para configurar el dominio:
+
+sudo certbot certonly --standalone -d 34-173-10-108.sslip.io
+
+
+INFOR DEL CERTIFICADO PARA HTTPS:
+
+Successfully received certificate.
+Certificate is saved at: /etc/letsencrypt/live/34-173-10-108.sslip.io/fullchain.pem
+Key is saved at:         /etc/letsencrypt/live/34-173-10-108.sslip.io/privkey.pem
+This certificate expires on 2025-07-29.
+These files will be updated when the certificate renews.
+Certbot has set up a scheduled task to automatically renew this certificate in the background.
+
+
+Ruta hacia HARBOR
+
+ https://34-173-10-108.sslip.io
