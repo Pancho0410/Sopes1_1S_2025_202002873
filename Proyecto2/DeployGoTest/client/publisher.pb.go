@@ -117,9 +117,10 @@ const file_client_publisher_proto_rawDesc = "" +
 	"\aMensaje\x12\x1c\n" +
 	"\tcontenido\x18\x01 \x01(\tR\tcontenido\"#\n" +
 	"\tRespuesta\x12\x16\n" +
-	"\x06estado\x18\x01 \x01(\tR\x06estado2G\n" +
+	"\x06estado\x18\x01 \x01(\tR\x06estado2\x83\x01\n" +
 	"\n" +
-	"Publicador\x129\n" +
+	"Publicador\x12:\n" +
+	"\x0ePublicarRabbit\x12\x12.publisher.Mensaje\x1a\x14.publisher.Respuesta\x129\n" +
 	"\rPublicarKafka\x12\x12.publisher.Mensaje\x1a\x14.publisher.RespuestaB\x11Z\x0f./client;clientb\x06proto3"
 
 var (
@@ -140,10 +141,12 @@ var file_client_publisher_proto_goTypes = []any{
 	(*Respuesta)(nil), // 1: publisher.Respuesta
 }
 var file_client_publisher_proto_depIdxs = []int32{
-	0, // 0: publisher.Publicador.PublicarKafka:input_type -> publisher.Mensaje
-	1, // 1: publisher.Publicador.PublicarKafka:output_type -> publisher.Respuesta
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	0, // 0: publisher.Publicador.PublicarRabbit:input_type -> publisher.Mensaje
+	0, // 1: publisher.Publicador.PublicarKafka:input_type -> publisher.Mensaje
+	1, // 2: publisher.Publicador.PublicarRabbit:output_type -> publisher.Respuesta
+	1, // 3: publisher.Publicador.PublicarKafka:output_type -> publisher.Respuesta
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name

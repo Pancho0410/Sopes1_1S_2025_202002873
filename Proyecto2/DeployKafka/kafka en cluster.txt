@@ -1,0 +1,13 @@
+kubectl create -f 'https://strimzi.io/install/latest?namespace=proyecto2' -n proyecto2
+
+
+### Creacion de apache cluster  / bajar el size
+kubectl apply -f 'https://strimzi.io/examples/latest/kafka/kraft/kafka-single-node.yaml' -n proyecto2
+kubectl apply -f kafka-single-node.yml -n proyecto2
+
+### Para esperar que se cree
+kubectl wait kafka/my-cluster --for=condition=Ready --timeout=300s -n proyecto2
+kubectl wait kafka/my-cluster --for=condition=Ready --timeout=7200s -n proyecto2
+
+Servicio/DNS al cual nos debemos conectar:
+my-cluster-kafka-bootstrap  

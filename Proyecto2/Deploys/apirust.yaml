@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rust-api-deployment
+  namespace: proyecto2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rust-api
+  template:
+    metadata:
+      labels:
+        app: rust-api
+    spec:
+      containers:
+      - name: rust-api
+        image: 34-173-10-108.sslip.io/sopes1p2/api-rust:latest
+        ports:
+          - containerPort: 8080
+        resources:
+          requests:
+            memory: "512Mi"  # 512 MB de RAM
+            cpu: "500m"     # 500 milicores de CPU (0.5 CPU)
+          limits:
+            memory: "512Mi"
+            cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rust-api-service
+  namespace: proyecto2
+spec:
+  selector:
+    app: rust-api
+  ports:
+    - protocol: TCP
+      port: 8080            # Puerto accesible externamente
+      targetPort: 8080    # Puerto del contenedor
+  type: ClusterIP
+  # type: LoadBalancer   #Para minikube
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-rust-ingress
+  namespace: proyecto2  
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: 34.69.113.160.sslip.io 
+      http:
+        paths:
+          - pathType: Prefix
+            backend:
+              service:
+                name: rust-api-service
+                port:
+                  number: 8080
+            path: /
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api-rust-hpa
+  namespace: proyecto2
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: rust-api-deployment
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 30

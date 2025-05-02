@@ -23,3 +23,6 @@ Certbot has set up a scheduled task to automatically renew this certificate in t
 Ruta hacia HARBOR
 
  https://34-173-10-108.sslip.io
+
+ clave: admin
+ contraseña: Harbor12345

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package publisher;
+option go_package = "./client;client"; 
+
+
+service Publicador {
+  rpc PublicarKafka (Mensaje) returns (Respuesta);
+}
+
+message Mensaje {
+  string contenido = 1;
+}
+
+message Respuesta {
+  string estado = 1;
+}

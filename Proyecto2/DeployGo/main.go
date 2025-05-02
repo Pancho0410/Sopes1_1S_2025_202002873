@@ -20,48 +20,45 @@ type ClimateData struct {
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	var data ClimateData
-	err := json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
-		http.Error(w, "Error en JSON", http.StatusBadRequest)
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		http.Error(w, "Error en el formato JSON", http.StatusBadRequest)
 		return
 	}
 
-	log.Printf("✅ Recibido desde Rust: %+v", data)
+	log.Printf("Recibido: %+v", data)
 
 	// conexion al cliente gRPC que esta esuchando en el puerto 50051
-	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(2*time.Second)) //Cliente gRPC
+	// grcpServer := "localhost:50051"
+	// grcpServer := "grpc-server:50051"
+	grcpServer := "go-producerkafka-service:50051"
+	conn, err := grpc.Dial(grcpServer, grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(2*time.Second)) //Cliente gRPC
 	if err != nil {
 		http.Error(w, "No se pudo conectar al servidor gRPC", http.StatusInternalServerError)
+		log.Println("Error gRPC:", err)
 		return
 	}
 	defer conn.Close()
 
 	cliente := client.NewPublicadorClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	msg := &client.Mensaje{Contenido: data.Description + " - " + data.Country + " - " + data.Weather} //Llama a Mensaje en publisher.pb.go
-
-	_, err = cliente.PublicarRabbit(ctx, msg)
-	if err != nil {
-		log.Println("❌ Error al llamar a PublicarRabbit:", err)
+	msg := &client.Mensaje{
+		Contenido: data.Description + " - " + data.Country + " - " + data.Weather, //Llama a Mensaje en publisher.pb.go
 	}
 
-	_, err = cliente.PublicarKafka(ctx, msg)
-	if err != nil {
-		log.Println("❌ Error al llamar a PublicarKafka:", err)
+	if _, err := cliente.PublicarKafka(ctx, msg); err != nil {
+		log.Println("Error al publicar en Kafka DeployGo:", err)
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Datos recibidos y funciones gRPC simuladas."))
+	w.Write([]byte("Datos enviados al servidor gRPC."))
 }
 
 func main() {
-	go client.StartGRPCServer() //Llama al run_grpc_server.go
-
 	http.HandleFunc("/input", handler)
-	log.Println("API Go escuchando en http://localhost:8081/input")
+	log.Println("API REST GO escuchando en http://go-api-service:8081/input")
 	// log.Fatal(http.ListenAndServe(":8081", nil)) //Local host
 	log.Fatal(http.ListenAndServe("0.0.0.0:8081", nil))
 }

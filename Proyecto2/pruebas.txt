@@ -1,0 +1,149 @@
+------------para crear imagenes dentro de minikube
+
+eval $(minikube docker-env)
+
+------------CREACION DE IMAGENES en docker
+
+docker build -t consumer ./ConsumerKafka
+docker build -t producer ./WriterKafka
+docker build -t api-go ./DeployGo
+docker build -t api-rust ./DeployRust/clima_api
+
+------------Subir imagenes a HARBOR
+1) hacer el tag
+    docker tag api-go:latest 34-173-10-108.sslip.io/sopes1p2/api-go:latest
+2) pushear
+    docker push 34-173-10-108.sslip.io/sopes1p2/api-go:latest
+
+--consumer
+    docker tag consumer:latest 34-173-10-108.sslip.io/sopes1p2/consumer:latest
+    docker push 34-173-10-108.sslip.io/sopes1p2/consumer:latest
+
+--producer
+    docker tag producer:latest 34-173-10-108.sslip.io/sopes1p2/producer:latest
+    docker push 34-173-10-108.sslip.io/sopes1p2/producer:latest
+
+--Api de RUST
+    docker tag api-rust:latest 34-173-10-108.sslip.io/sopes1p2/api-rust:latest
+    docker push 34-173-10-108.sslip.io/sopes1p2/api-rust:latest
+
+------------Aplicacion de deployments en el cluster
+kubectl apply -f "ruta del .yml"
+kubectl apply -f ./consumerkafka.yml
+
+------------Ver los deploys del namespace
+kubectl get deploy -n proyecto2
+
+------------Eliminacion de deployments
+kubectl delete deployment go-consumerkafka-deployment -n proyecto2
+kubectl delete deployment go-producerkafka-deployment -n proyecto2
+
+------------Ver pods de un namespace
+kubectl get pods -n proyecto2
+
+------------Ver los servicios de un namespace
+kubectl get svc -n proyecto2
+
+------------Ver logs de un pod
+kubectl logs -n proyecto2
+kubectl logs -n proyecto2 go-consumerkafka-deployment-55666d7dcb-7vftt
+
+
+------------Configuraciones en el CLUSTER DE GCP------------
+
+kubectl create ns nginx-ingress
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx 
+helm repo update 
+helm install nginx-ingress ingress-nginx/ingress-nginx -n nginx-ingress
+
+----An example Ingress that makes use of the controller:
+  apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: example
+    namespace: foo
+  spec:
+    ingressClassName: nginx
+    rules:
+      - host: www.example.com
+        http:
+          paths:
+            - pathType: Prefix
+              backend:
+                service:
+                  name: exampleService
+                  port:
+                    number: 80
+              path: /
+    # This section is only required if TLS is to be enabled for the Ingress
+    tls:
+      - hosts:
+        - www.example.com
+        secretName: example-tls
+
+----ver el servicio del Balanceador de carga del ingress / esta en el namespace nginx-ingress
+kubectl get svc -n nginx-ingress  
+
+NAME                                               TYPE           CLUSTER-IP       EXTERNAL-IP     PORT(S)                      AGE
+nginx-ingress-ingress-nginx-controller             LoadBalancer   34.118.237.53    34.69.113.160   80:30268/TCP,443:30792/TCP   17m
+
+
+----Servicio del ingresss para aplicar al .yaml del pod
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mywebserver
+  namespace: foo
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: 35.239.90.79.nip.io
+      http:
+        paths:
+          - pathType: Prefix
+            backend:
+              service:
+                name: mywebserver
+                port:
+                  number: 80
+            path: /
+
+
+----En este caso el que debo usar queda asi:
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-rust-ingress
+  namespace: proyecto2  <--Namespace que estoy usando
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: 34.69.113.160.nip.io  <--Reemplazr la ip externa del balanceador
+      http:
+        paths:
+          - pathType: Prefix
+            backend:
+              service:
+                name: mywebserver <--Debe coincidir con el servicio ClusterIP de nuestra app/deploy
+                port:
+                  number: 8080 <--Puerto que vamos a mostrar
+            path: /input
+
+
+----ver los ingresses creados en el cluste
+kubectl get ingresses -n proyecto2
+
+----Habilitar la metricas -> Metric Server
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+----verificar si el Horizontal Pod Autoscaler (HPA) se ha creado correctamente y está funcionando en tu cluster
+kubectl get hpa -n proyecto2   <-OBSERVAR METRICAS HPA--------------------------------
+
+
+
+----Conexion a grafana
+34.69.113.160.nip.io 
+
+----VER HPA
+kubectl get hpa -n proyecto2

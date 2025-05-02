@@ -19,13 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Publicador_PublicarKafka_FullMethodName = "/publisher.Publicador/PublicarKafka"
+	Publicador_PublicarRabbit_FullMethodName = "/publisher.Publicador/PublicarRabbit"
+	Publicador_PublicarKafka_FullMethodName  = "/publisher.Publicador/PublicarKafka"
 )
 
 // PublicadorClient is the client API for Publicador service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PublicadorClient interface {
+	PublicarRabbit(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*Respuesta, error)
 	PublicarKafka(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*Respuesta, error)
 }
 
@@ -35,6 +37,16 @@ type publicadorClient struct {
 
 func NewPublicadorClient(cc grpc.ClientConnInterface) PublicadorClient {
 	return &publicadorClient{cc}
+}
+
+func (c *publicadorClient) PublicarRabbit(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*Respuesta, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Respuesta)
+	err := c.cc.Invoke(ctx, Publicador_PublicarRabbit_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *publicadorClient) PublicarKafka(ctx context.Context, in *Mensaje, opts ...grpc.CallOption) (*Respuesta, error) {
@@ -51,6 +63,7 @@ func (c *publicadorClient) PublicarKafka(ctx context.Context, in *Mensaje, opts 
 // All implementations must embed UnimplementedPublicadorServer
 // for forward compatibility.
 type PublicadorServer interface {
+	PublicarRabbit(context.Context, *Mensaje) (*Respuesta, error)
 	PublicarKafka(context.Context, *Mensaje) (*Respuesta, error)
 	mustEmbedUnimplementedPublicadorServer()
 }
@@ -62,6 +75,9 @@ type PublicadorServer interface {
 // pointer dereference when methods are called.
 type UnimplementedPublicadorServer struct{}
 
+func (UnimplementedPublicadorServer) PublicarRabbit(context.Context, *Mensaje) (*Respuesta, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PublicarRabbit not implemented")
+}
 func (UnimplementedPublicadorServer) PublicarKafka(context.Context, *Mensaje) (*Respuesta, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PublicarKafka not implemented")
 }
@@ -84,6 +100,24 @@ func RegisterPublicadorServer(s grpc.ServiceRegistrar, srv PublicadorServer) {
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&Publicador_ServiceDesc, srv)
+}
+
+func _Publicador_PublicarRabbit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Mensaje)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PublicadorServer).PublicarRabbit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Publicador_PublicarRabbit_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PublicadorServer).PublicarRabbit(ctx, req.(*Mensaje))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Publicador_PublicarKafka_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -111,6 +145,10 @@ var Publicador_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "publisher.Publicador",
 	HandlerType: (*PublicadorServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "PublicarRabbit",
+			Handler:    _Publicador_PublicarRabbit_Handler,
+		},
 		{
 			MethodName: "PublicarKafka",
 			Handler:    _Publicador_PublicarKafka_Handler,

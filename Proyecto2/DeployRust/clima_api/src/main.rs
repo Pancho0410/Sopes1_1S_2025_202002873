@@ -31,7 +31,8 @@ async fn receive_data(data: web::Json<ClimateData>) -> impl Responder {
 
     let client = reqwest::Client::new();
     let result = client
-        .post("http://localhost:8081/input")
+        // .post("http://localhost:8081/input")
+        .post("http://go-api-service:8081/input")
         .json(&*data)
         .send()
         .await;
@@ -50,13 +51,15 @@ async fn receive_data(data: web::Json<ClimateData>) -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    println!("API RUST running at http://localhost:8080");
+    // println!("API RUST running at http://localhost:8080");
+    println!("API RUST running at http://rust-api-service:8080");
     HttpServer::new(|| {
         App::new()
             .service(welcome)
             .service(receive_data)
     })
-    .bind(("127.0.0.1", 8080))?
+    // .bind(("127.0.0.1", 8080))?
+    .bind(("0.0.0.0", 8080))?
     .run()
     .await
 }

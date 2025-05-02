@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-producerkafka-deployment
+  namespace: proyecto2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-producerkafka
+  template:
+    metadata:
+      labels:
+        app: go-producerkafka
+    spec:
+      containers:
+      - name: go-producerkafka
+        # image: producer:latest
+        image: 34-173-10-108.sslip.io/sopes1p2/producer:latest
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "512Mi"
+            cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-producerkafka-service
+  namespace: proyecto2
+spec:
+  selector:
+    app: go-producerkafka
+  ports:
+    - protocol: TCP
+      port: 50051        # Puerto expuesto por el servicio
+      targetPort: 50051  # Puerto dentro del contenedor
+  type: ClusterIP 

@@ -16,10 +16,10 @@ func main() { //SERVIDOR GRCP
 	}
 
 	grpcServer := grpc.NewServer()
-	client.RegisterPublicadorServer(grpcServer, client.NewServer())
+	client.RegisterPublicadorServer(grpcServer, client.NewServer()) //aca cambia a las funciones de server.go en client
 
 	log.Println("Servidor gRPC escuchando en puerto 50051...")
-	if err := grpcServer.Serve(lis); err != nil {
+	if err := grpcServer.Serve(lis); err != nil { //Levanta el servidor gRPC
 		log.Fatalf("❌ Error al servir: %v", err)
 	}
 }
